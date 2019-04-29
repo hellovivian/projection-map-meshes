@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - postprocessing - unreal bloom</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				color: #fff;
+				font-family:Monospace;
+				font-size:13px;
+				text-align:center;
+				background-color: #fff;
+				margin: 0px;
+				overflow: hidden;
+			}
+			#info {
+				position: absolute;
+				top: 0px;
+				width: 100%;
+				padding: 5px;
+			}
+			#info p {
+				max-width: 600px;
+				margin-left: auto;
+				margin-right: auto;
+				padding: 0 2em;
+			}
+			a {
+				color: #2983ff;
+			}
+		</style>
+	</head>
+
+	<body>
+       <video id="videoTex" autoplay loop crossOrigin="anonymous" webkit-playsinline style="display:none">
+<source src="../media/bluefire.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+</video>
+      
+		<div id="container"></div>
+
+		<div id="info">
+			<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> - Bloom pass by <a href="http://eduperiment.com" target="_blank" rel="noopener">Prashant Sharma</a> and <a href="https://clara.io" target="_blank" rel="noopener">Ben Houston</a>
+			<p>
+				This Bloom Pass is inspired by the bloom pass of the Unreal Engine. It creates a mip map chain of bloom textures and blur them
+				with different radii. Because of the weigted combination of mips, and since larger blurs are done on higher mips, this bloom
+				is better in quality and performance.
+			</p>
+
+			<a href="http://mjmurdock.com/" target="_blank" rel="noopener">Mike Murdock</a>, CC Attribution.
+		</div>
+
+		<script src="../js/three.js"></script>
+
+		<script src="../js/stats.min.js"></script>
+		<script src="../js/dat.gui.min.js"></script>
+		<script src="../js/OrbitControls.js"></script>
+		<script src="../js/GLTFLoader.js"></script>
+       <script src="../js/STLLoader.js"></script>
+		<script src="../js/EffectComposer.js"></script>
+		<script src="../js/RenderPass.js"></script>
+		<script src="../js/ShaderPass.js"></script>
+		<script src="../js/CopyShader.js"></script>
+		<script src="../js/LuminosityHighPassShader.js"></script>
+		<script src="../js/UnrealBloomPass.js"></script>
+       
+		<script>
+
+			var scene, camera, controls, pointLight, stats;
+			var composer, renderer, mixer;
+
+			var params = {
+				exposure: 1,
+				bloomStrength: 1.5,
+				bloomThreshold: 0,
+				bloomRadius: 0
+			};
+
+			var clock = new THREE.Clock();
+			var container = document.getElementById( 'container' );
+
+			stats = new Stats();
+			container.appendChild( stats.dom );
+
+			renderer = new THREE.WebGLRenderer( { antialias: true } );
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.toneMapping = THREE.ReinhardToneMapping;
+			container.appendChild( renderer.domElement );
+
+			scene = new THREE.Scene();
+            maskscene = new THREE.Scene();
+
+			camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 100 );
+			camera.position.set( - 5, 2.5, - 3.5 );
+			scene.add( camera );
+
+			controls = new THREE.OrbitControls( camera, renderer.domElement );
+			controls.maxPolarAngle = Math.PI * 0.5;
+			controls.minDistance = 1;
+			controls.maxDistance = 100;
+
+			scene.add( new THREE.AmbientLight( 0x404040 ) );
+
+			pointLight = new THREE.PointLight( 0xffffff, 1 );
+			camera.add( pointLight );
+
+			var renderScene = new THREE.RenderPass( scene, camera );
+            renderer.autoClear = false ;
+			var bloomPass = new THREE.UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 );
+			bloomPass.threshold = params.bloomThreshold;
+			bloomPass.strength = params.bloomStrength;
+			bloomPass.radius = params.bloomRadius;
+
+			composer = new THREE.EffectComposer( renderer );
+			composer.setSize( window.innerWidth, window.innerHeight );
+			composer.addPass( renderScene );
+			composer.addPass( bloomPass );
+
+
+           var meshh = new THREE.BoxGeometry(1,1,1);
+           var faces, obscureBox;
+           var changingmaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, vertexColors: THREE.FaceColors } );
+           
+           //projector frustrum   
+            var frustFOV = 30;
+            var frustRatio = 16 / 9;
+            var frustPlane = 10;
+            var frustH = frustPlane * Math.sin(THREE.Math.degToRad(frustFOV * 0.5));
+            var frustW = frustH * frustRatio;
+            var frustPoints = [
+                new THREE.Vector3(),
+                new THREE.Vector3( -frustW,  frustH, -frustPlane ),
+              new THREE.Vector3(  frustW,  frustH, -frustPlane ),
+              new THREE.Vector3( -frustW, -frustH, -frustPlane ),
+              new THREE.Vector3(  frustW, -frustH, -frustPlane )
+            ];
+            var frustGeom = new THREE.BufferGeometry().setFromPoints(frustPoints);
+            frustGeom.setIndex([0,1, 0, 2, 0, 3, 0, 4, 1, 2, 2, 4, 4, 3, 3, 1]);
+            var frustumHelper = new THREE.LineSegments(frustGeom, new THREE.LineBasicMaterial({color: 0xff0000}));
+            frustumHelper.position.set(0, 25, 25);
+            frustumHelper.rotation.x = -44.5 ; 
+            frustumHelper.updateMatrixWorld();
+            scene.add(frustumHelper);
+   
+           
+         var projectiveMaterial = new THREE.ShaderMaterial({
+             uniforms: {
+                 baseColor: {value: new THREE.Color(0xcccccc)},
+                 frustum: { value: [
+                 new THREE.Vector3(),
+                 new THREE.Vector3(),
+                 new THREE.Vector3(),
+                 new THREE.Vector3(),
+                 new THREE.Vector3(),
+                 ]},
+               texture: {value: new THREE.VideoTexture( videoTex )}
+             },
+             vertexShader: `
+
+               varying vec4 vWorldPos;
+
+               void main() {
+                 vWorldPos = modelMatrix * vec4(position, 1.0);
+                 gl_Position = projectionMatrix * viewMatrix * vWorldPos;
+               }
+             `,
+             fragmentShader: `
+                 uniform vec3 baseColor;
+               uniform vec3 frustum[5];
+               uniform sampler2D texture;
+
+               varying vec4 vWorldPos;
+
+               // port from https://github.com/mrdoob/three.js/blob/35ae830a7c4544582ed2759e5b18c5d6ef37c6d9/src/math/Vector3.js#L559
+               vec3 projectOnVector(vec3 a, vec3 b){
+                 float dist = length(b);
+                 return b * ( dot(a, b) / (dist * dist) );
+               }
+
+                 void main() {
+
+                 vec3 dir = vWorldPos.xyz - frustum[0];
+                 vec3 center = (frustum[1] + frustum[2] + frustum[3] + frustum[4]) * 0.25;
+                 vec3 frustumAxis = center - frustum[0];
+
+                 vec3 projected = projectOnVector(dir, frustumAxis);
+                 float scalar = length(frustumAxis) / length(projected);
+                 vec3 planeProj = ( dir * scalar ) + frustum[0];
+
+                 // UVs
+                 vec3 uvBase = planeProj - frustum[1]; // from top-left corner
+
+                 vec3 sub12 = frustum[2] - frustum[1];
+                 vec3 sub12uv = projectOnVector(uvBase, sub12);
+                 float u = length(sub12uv) * sign(dot(sub12, sub12uv)) / length(sub12);
+                 vec3 sub13 = frustum[3] - frustum[1];
+                 vec3 sub13uv = projectOnVector(uvBase, sub13);
+                 float v = length(sub13uv) * sign(dot(sub13, sub13uv)) / length(sub13);
+                 v = 1. - v;
+
+                 vec3 color = ( max( u,v ) <= 1. && min( u, v ) >= 0. ) ? texture2D(texture, vec2(u, v)).rgb : vec3(1);
+
+                 gl_FragColor = vec4(baseColor * color, 1.0);
+               }
+             `,
+             side: THREE.DoubleSide
+           }); 
+           var clock = new THREE.Clock();
+           var time = 0;
+           
+           new THREE.STLLoader().load( '../media/bear.stl', function ( geometry ) {
+
+				
+//               var cubeWireframe = new THREE.WireframeGeometry(geometry);
+//           var cubeMat = new THREE.LineBasicMaterial( { color: 0x22ffff, linewidth: 10 } );
+//                  
+//           var cubeLines = new THREE.LineSegments(cubeWireframe, cubeMat);
+//              cubeLines.scale.x = 0.5;
+//              cubeLines.scale.y = 0.5;
+//              cubeLines.scale.z = 0.5;
+//              cubeLines.rotation.x = - 3.14 / 2;
+//           scene.add(cubeLines);
+//              
+               
+             geomFromBuffer = new THREE.Geometry().fromBufferGeometry( geometry );
+              
+             
+             meshh = new THREE.Mesh(geomFromBuffer, changingmaterial);
+//              faces = geomFromBuffer.faces; 
+//
+//              meshh.scale.x = 0.5;
+//              meshh.scale.y = 0.5;
+//              meshh.scale.z = 0.5;
+//              
+              meshh.rotation.x = -3.14 / 2;
+//  
+//              scene.add(meshh);
+              
+              var screen = new THREE.Mesh(meshh.geometry, projectiveMaterial );
+               screen.position.z = 0;
+               //screen.scale.set(2,2,2); //double the size, for debugging purposes.
+               screen.material = projectiveMaterial;
+              screen.rotation.x = -3.14 / 2;
+              screen.scale.x = 0.5;
+              screen.scale.y = 0.5;
+              screen.scale.z = 0.5;
+               scene.add(screen);
+
+               frustPoints.forEach( (p, idx) => {
+                   frustumHelper.localToWorld(screen.material.uniforms.frustum.value[idx].copy(p));	
+               });
+
+               var rotation = THREE.Math.degToRad(15);
+              
+              
+              animate();
+
+			} );
+
+
+
+
+
+           
+           
+           
+           
+
+			var gui = new dat.GUI();
+
+			gui.add( params, 'exposure', 0.1, 2 ).onChange( function ( value ) {
+
+				renderer.toneMappingExposure = Math.pow( value, 4.0 );
+
+			} );
+
+			gui.add( params, 'bloomThreshold', 0.0, 1.0 ).onChange( function ( value ) {
+
+				bloomPass.threshold = Number( value );
+
+			} );
+
+			gui.add( params, 'bloomStrength', 0.0, 3.0 ).onChange( function ( value ) {
+
+				bloomPass.strength = Number( value );
+
+			} );
+
+			gui.add( params, 'bloomRadius', 0.0, 1.0 ).step( 0.01 ).onChange( function ( value ) {
+
+				bloomPass.radius = Number( value );
+
+			} );
+
+			window.onresize = function () {
+
+				var width = window.innerWidth;
+				var height = window.innerHeight;
+
+				camera.aspect = width / height;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( width, height );
+				composer.setSize( width, height );
+
+			};
+
+
+			function animate() {
+          
+               
+
+				requestAnimationFrame( animate );
+                time += clock.getDelta();
+				const delta = clock.getDelta();
+
+//				mixer.update( delta );
+
+				stats.update();
+
+				composer.render();
+
+			}
+
+		</script>
+
+	</body>
+
+</html>

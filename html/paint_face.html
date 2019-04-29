@@ -47,19 +47,19 @@
 			<a href="http://mjmurdock.com/" target="_blank" rel="noopener">Mike Murdock</a>, CC Attribution.
 		</div>
 
-		<script src="../build/three.js"></script>
+		<script src="../js/three.js"></script>
 
-		<script src="js/libs/stats.min.js"></script>
-		<script src="js/libs/dat.gui.min.js"></script>
-		<script src="js/controls/OrbitControls.js"></script>
-		<script src="js/loaders/GLTFLoader.js"></script>
-       <script src="js/loaders/STLLoader.js"></script>
-		<script src="js/postprocessing/EffectComposer.js"></script>
-		<script src="js/postprocessing/RenderPass.js"></script>
-		<script src="js/postprocessing/ShaderPass.js"></script>
-		<script src="js/shaders/CopyShader.js"></script>
-		<script src="js/shaders/LuminosityHighPassShader.js"></script>
-		<script src="js/postprocessing/UnrealBloomPass.js"></script>
+		<script src="../js/stats.min.js"></script>
+		<script src="../js/dat.gui.min.js"></script>
+		<script src="../js/OrbitControls.js"></script>
+		<script src="../js/GLTFLoader.js"></script>
+       <script src="../js/STLLoader.js"></script>
+		<script src="../js/EffectComposer.js"></script>
+		<script src="../js/RenderPass.js"></script>
+		<script src="../js/ShaderPass.js"></script>
+		<script src="../js/CopyShader.js"></script>
+		<script src="../js/LuminosityHighPassShader.js"></script>
+		<script src="../js/UnrealBloomPass.js"></script>
 
 		<script>
 
@@ -114,11 +114,12 @@
 			composer.addPass( renderScene );
 			composer.addPass( bloomPass );
 
-//           enter viv
+
            var meshh, faces, obscureBox;
+           var changingmaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, vertexColors: THREE.FaceColors } );
    
            
-           new THREE.STLLoader().load( './bear.stl', function ( geometry ) {
+           new THREE.STLLoader().load( '../media/bear.stl', function ( geometry ) {
 
 				
                var cubeWireframe = new THREE.WireframeGeometry(geometry);
@@ -134,49 +135,37 @@
                
              geomFromBuffer = new THREE.Geometry().fromBufferGeometry( geometry );
               
-//              var changingMat = new THREE.MeshBasicMaterial( { color: 0xff0000, vertexColors: THREE.FaceColors  } );
-             meshh = new THREE.Mesh(geomFromBuffer, cubeMat);
-              faces = geomFromBuffer.faces; 
-            
              
-            
+             meshh = new THREE.Mesh(geomFromBuffer, changingmaterial);
+              faces = geomFromBuffer.faces; 
+
               meshh.scale.x = 0.5;
               meshh.scale.y = 0.5;
               meshh.scale.z = 0.5;
               
               meshh.rotation.x = -3.14 / 2;
               
-              for(var i = 0 ; i < faces.length; i++){
-              var face = faces[i];
+                   
+               faces = meshh.geometry.faces;
+               for(var i = 0 ; i < faces.length; i++){
+                 var randomR = Math.random();
+                  var randomG = Math.random();
+                  var randomB = Math.random();
+                 faces[i].color.setRGB(randomR, randomG, randomB);
+                  for (var j = 0; j < 3; j++) {
+                     faces[i].vertexColors[j].setRGB(randomR, randomG, randomB);
+                  }
               
-              face.color.setRGB( Math.random(),Math.random(), Math.random());
-              console.log(face);
             }
-//              meshh.geometry.elementsNeedUpdate = true; 
+               meshh.geometry.elementsNeedUpdate = true;
+              meshh.geometry.colorsNeedUpdate = true; 
+      
               scene.add(meshh);
               animate();
 
 			} );
- //exit viv
-           
-			new THREE.GLTFLoader().load( 'models/gltf/PrimaryIonDrive.glb', function ( gltf ) {
+ 
 
-				var model = gltf.scene;
-
-				scene.add( model );
-
-				// Mesh contains self-intersecting semi-transparent faces, which display
-				// z-fighting unless depthWrite is disabled.
-				var core = model.getObjectByName( 'geo1_HoloFillDark_0' );
-				core.material.depthWrite = false;
-
-				mixer = new THREE.AnimationMixer( model );
-				var clip = gltf.animations[ 0 ];
-				mixer.clipAction( clip.optimize() ).play();
-
-				animate();
-
-			} );
 
 			var gui = new dat.GUI();
 
@@ -219,6 +208,8 @@
 
 
 			function animate() {
+          
+               
 
 				requestAnimationFrame( animate );
        
