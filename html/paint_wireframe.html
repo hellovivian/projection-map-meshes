@@ -65,13 +65,18 @@
 
 			var scene, camera, controls, pointLight, stats;
 			var composer, renderer, mixer;
+			var cubeLines;
 
 			var params = {
 				exposure: 1,
 				bloomStrength: 1.5,
 				bloomThreshold: 0,
-				bloomRadius: 0
+				bloomRadius: 0, 
+				rotationSpeed: 0, 
+				rotationOffset: 0
 			};
+			var ROTATION_AMOUNT = 0;
+			var ROTATION_OFFSET = 0; 
 
 			var clock = new THREE.Clock();
 			var container = document.getElementById( 'container' );
@@ -125,7 +130,7 @@
                var cubeWireframe = new THREE.WireframeGeometry(geometry);
            var cubeMat = new THREE.LineBasicMaterial( { color: 0x22ffff, linewidth: 10 } );
                   
-           var cubeLines = new THREE.LineSegments(cubeWireframe, cubeMat);
+           cubeLines = new THREE.LineSegments(cubeWireframe, cubeMat);
               cubeLines.scale.x = 0.5;
               cubeLines.scale.y = 0.5;
               cubeLines.scale.z = 0.5;
@@ -193,6 +198,20 @@
 
 			} );
 
+			gui.add( params, 'rotationSpeed', 0.0, 1.0 ).step( 0.01 ).onChange( function ( value ) {
+
+				ROTATION_AMOUNT = Number( value );
+
+			} );
+
+			gui.add( params, 'rotationOffset', -180.0, +180.0 ).step( 1 ).onChange( function ( value ) {
+
+				cubeLines.rotation.z = Number(value);
+				meshh.rotation.z = Number(value);
+				ROTATION_OFFSET = Number( value );
+
+			} );
+
 			window.onresize = function () {
 
 				var width = window.innerWidth;
@@ -210,7 +229,8 @@
 			function animate() {
           
                
-
+				cubeLines.rotation.z += ROTATION_AMOUNT;
+				meshh.rotation.z += ROTATION_AMOUNT;
 				requestAnimationFrame( animate );
        
 				const delta = clock.getDelta();
