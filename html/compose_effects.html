@@ -33,22 +33,13 @@
 	</head>
 
 	<body>
-       <video id="videoTex" autoplay loop crossOrigin="anonymous" webkit-playsinline style="display:none">
-<source src="../media/bluefire.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+       <video id="videoTex" autoplay muted loop crossOrigin="anonymous" webkit-playsinline style="display:none">
+<source src="../media/bluefire.mp4" type='video/mp4;'>
 </video>
       
 		<div id="container"></div>
 
-		<div id="info">
-			<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> - Bloom pass by <a href="http://eduperiment.com" target="_blank" rel="noopener">Prashant Sharma</a> and <a href="https://clara.io" target="_blank" rel="noopener">Ben Houston</a>
-			<p>
-				This Bloom Pass is inspired by the bloom pass of the Unreal Engine. It creates a mip map chain of bloom textures and blur them
-				with different radii. Because of the weigted combination of mips, and since larger blurs are done on higher mips, this bloom
-				is better in quality and performance.
-			</p>
-
-			<a href="http://mjmurdock.com/" target="_blank" rel="noopener">Mike Murdock</a>, CC Attribution.
-		</div>
+	
 
 		<script src="../js/three.js"></script>
 
@@ -212,15 +203,15 @@
            new THREE.STLLoader().load( '../media/bear.stl', function ( geometry ) {
 
 				
-               var cubeWireframe = new THREE.WireframeGeometry(geometry);
-           var cubeMat = new THREE.LineBasicMaterial( { color: 0x22ffff, linewidth: 10 } );
-                  
-           var cubeLines = new THREE.LineSegments(cubeWireframe, cubeMat);
-              cubeLines.scale.x = 0.5;
-              cubeLines.scale.y = 0.5;
-              cubeLines.scale.z = 0.5;
-              cubeLines.rotation.x = - 3.14 / 2;
-           scene.add(cubeLines);
+//               var cubeWireframe = new THREE.WireframeGeometry(geometry);
+//           var cubeMat = new THREE.LineBasicMaterial( { color: 0x22ffff, linewidth: 10 } );
+//                  
+//           var cubeLines = new THREE.LineSegments(cubeWireframe, cubeMat);
+//              cubeLines.scale.x = 0.5;
+//              cubeLines.scale.y = 0.5;
+//              cubeLines.scale.z = 0.5;
+//              cubeLines.rotation.x = - 3.14 / 2;
+//           scene.add(cubeLines);
 //              
                
              geomFromBuffer = new THREE.Geometry().fromBufferGeometry( geometry );
