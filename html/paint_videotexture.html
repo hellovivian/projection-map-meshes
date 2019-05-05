@@ -39,17 +39,6 @@
       
 		<div id="container"></div>
 
-		<div id="info">
-			<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> - Bloom pass by <a href="http://eduperiment.com" target="_blank" rel="noopener">Prashant Sharma</a> and <a href="https://clara.io" target="_blank" rel="noopener">Ben Houston</a>
-			<p>
-				This Bloom Pass is inspired by the bloom pass of the Unreal Engine. It creates a mip map chain of bloom textures and blur them
-				with different radii. Because of the weigted combination of mips, and since larger blurs are done on higher mips, this bloom
-				is better in quality and performance.
-			</p>
-
-			<a href="http://mjmurdock.com/" target="_blank" rel="noopener">Mike Murdock</a>, CC Attribution.
-		</div>
-
 		<script src="../js/three.js"></script>
 
 		<script src="../js/stats.min.js"></script>
@@ -73,8 +62,12 @@
 				exposure: 1,
 				bloomStrength: 1.5,
 				bloomThreshold: 0,
-				bloomRadius: 0
+				bloomRadius: 0, 
+				rotationSpeed: 1, 
+				rotationOffset: 0
 			};
+			var ROTATION_AMOUNT = 1;
+			var ROTATION_OFFSET = 0;
 
 			var clock = new THREE.Clock();
 			var container = document.getElementById( 'container' );
@@ -237,7 +230,7 @@
 //  
 //              scene.add(meshh);
               
-              var screen = new THREE.Mesh(meshh.geometry, projectiveMaterial );
+              screen = new THREE.Mesh(meshh.geometry, projectiveMaterial );
                screen.position.z = 0;
                //screen.scale.set(2,2,2); //double the size, for debugging purposes.
                screen.material = projectiveMaterial;
@@ -293,6 +286,17 @@
 
 			} );
 
+			gui.add( params, 'rotationSpeed', 0.0, 1.0 ).step( 0.01 ).onChange( function ( value ) {
+
+				ROTATION_AMOUNT = Number( value );
+
+			} );
+
+			gui.add( params, 'rotationOffset', -180.0, +180.0 ).step( 1 ).onChange( function ( value ) {
+				screen.rotation.z = Number(value);
+				ROTATION_OFFSET = Number( value );
+			} );
+
 			window.onresize = function () {
 
 				var width = window.innerWidth;
@@ -306,11 +310,9 @@
 
 			};
 
-
 			function animate() {
           
-               
-
+              	screen.rotation.z += ROTATION_AMOUNT; 
 				requestAnimationFrame( animate );
                 time += clock.getDelta();
 				const delta = clock.getDelta();
