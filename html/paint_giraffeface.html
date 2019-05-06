@@ -50,7 +50,7 @@
 		<script src="../js/CopyShader.js"></script>
 		<script src="../js/LuminosityHighPassShader.js"></script>
 		<script src="../js/UnrealBloomPass.js"></script>
-
+        <script src="../js/MeshLine.js"></script>
 		<script>
 
 			var scene, camera, controls, pointLight, stats;
@@ -113,13 +113,13 @@
            var changingmaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, vertexColors: THREE.FaceColors } );
          
            var colors = [];
-           colors.push([237,200,144]);
+           colors.push([158,109,63]);
            colors.push([117,86,39]);
            
            new THREE.STLLoader().load( '../media/giraffe.stl', function ( geometry ) {
 
                              var cubeWireframe = new THREE.WireframeGeometry(geometry);
-           var cubeMat = new THREE.LineBasicMaterial( { color: 0x22ffff, linewidth: 10 } );
+           var cubeMat = new THREE.LineBasicMaterial( { color: 0xedcaaa, linewidth: 100 } );
                   
            cubeLines = new THREE.LineSegments(cubeWireframe, cubeMat);
         
@@ -158,7 +158,7 @@
 			} );
  
                var cube = new THREE.BoxGeometry(100,10,100);
-              var blackMaterial = new THREE.MeshStandardMaterial({color: '#000000'});
+              var blackMaterial = new THREE.MeshBasicMaterial({color: '#000000'});
               var cubeMesh = new THREE.Mesh(cube, blackMaterial);
               scene.add(cubeMesh);
 
