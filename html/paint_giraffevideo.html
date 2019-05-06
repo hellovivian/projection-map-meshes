@@ -33,12 +33,13 @@
 	</head>
 
 	<body>
-       <video id="videoTex" autoplay loop crossOrigin="anonymous" webkit-playsinline style="display:none">
-<source src="../media/bluefire.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+
+         <video id="videoTex" controls autoplay loop style="display:none">
+<source src="../media/bluefire.mp4" type='video/mp4; '>
 </video>
-      
 		<div id="container"></div>
 
+		
 		<script src="../js/three.js"></script>
 
 		<script src="../js/stats.min.js"></script>
@@ -52,9 +53,9 @@
 		<script src="../js/CopyShader.js"></script>
 		<script src="../js/LuminosityHighPassShader.js"></script>
 		<script src="../js/UnrealBloomPass.js"></script>
-       
+        <script src="../js/MeshLine.js"></script>
 		<script>
-
+            videoTex.volume = 0;
 			var scene, camera, controls, pointLight, stats;
 			var composer, renderer, mixer;
 
@@ -62,13 +63,10 @@
 				exposure: 1,
 				bloomStrength: 1.5,
 				bloomThreshold: 0,
-				bloomRadius: 0, 
-				rotationSpeed: 0.05, 
-				rotationOffset: 0
+				bloomRadius: 0
 			};
-			var ROTATION_AMOUNT = 0.05;
-			var ROTATION_OFFSET = 0;
-
+            
+           
 			var clock = new THREE.Clock();
 			var container = document.getElementById( 'container' );
 
@@ -79,19 +77,23 @@
 			renderer.setPixelRatio( window.devicePixelRatio );
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			renderer.toneMapping = THREE.ReinhardToneMapping;
+            renderer.autoClear = false;
 			container.appendChild( renderer.domElement );
 
 			scene = new THREE.Scene();
-            maskscene = new THREE.Scene();
+           
+            wireframeScene = new THREE.Scene();
 
-			camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 100 );
+			camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 1000 );
 			camera.position.set( - 5, 2.5, - 3.5 );
 			scene.add( camera );
 
 			controls = new THREE.OrbitControls( camera, renderer.domElement );
 			controls.maxPolarAngle = Math.PI * 0.5;
+           controls.minPolarAngle = Math.PI *0.5;
+//           controls.maxPolarAngle = Math.PI/2;
 			controls.minDistance = 1;
-			controls.maxDistance = 100;
+		
 
 			scene.add( new THREE.AmbientLight( 0x404040 ) );
 
@@ -109,35 +111,9 @@
 			composer.setSize( window.innerWidth, window.innerHeight );
 			composer.addPass( renderScene );
 			composer.addPass( bloomPass );
-
-
-           var meshh = new THREE.BoxGeometry(1,1,1);
-           var faces, obscureBox;
-           var changingmaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, vertexColors: THREE.FaceColors } );
            
-           //projector frustrum   
-            var frustFOV = 30;
-            var frustRatio = 16 / 9;
-            var frustPlane = 10;
-            var frustH = frustPlane * Math.sin(THREE.Math.degToRad(frustFOV * 0.5));
-            var frustW = frustH * frustRatio;
-            var frustPoints = [
-                new THREE.Vector3(),
-                new THREE.Vector3( -frustW,  frustH, -frustPlane ),
-              new THREE.Vector3(  frustW,  frustH, -frustPlane ),
-              new THREE.Vector3( -frustW, -frustH, -frustPlane ),
-              new THREE.Vector3(  frustW, -frustH, -frustPlane )
-            ];
-            var frustGeom = new THREE.BufferGeometry().setFromPoints(frustPoints);
-            frustGeom.setIndex([0,1, 0, 2, 0, 3, 0, 4, 1, 2, 2, 4, 4, 3, 3, 1]);
-            var frustumHelper = new THREE.LineSegments(frustGeom, new THREE.LineBasicMaterial({color: 0xff0000}));
-            frustumHelper.position.set(0, 25, 50);
-            frustumHelper.rotation.x = -44.5 ; 
-            frustumHelper.updateMatrixWorld();
-            scene.add(frustumHelper);
-   
            
-         var projectiveMaterial = new THREE.ShaderMaterial({
+                        var projectiveMaterial = new THREE.ShaderMaterial({
              uniforms: {
                  baseColor: {value: new THREE.Color(0xcccccc)},
                  frustum: { value: [
@@ -199,45 +175,86 @@
              `,
              side: THREE.DoubleSide
            }); 
-           var clock = new THREE.Clock();
+          
            var time = 0;
+           
+           //projector frustrum   
+            var frustFOV = 30;
+            var frustRatio = 16 / 9;
+            var frustPlane = 40;
+            var frustH = frustPlane * Math.sin(THREE.Math.degToRad(frustFOV * 0.5));
+            var frustW = frustH * frustRatio;
+            var frustPoints = [
+                new THREE.Vector3(),
+                new THREE.Vector3( -frustW,  frustH, -frustPlane ),
+              new THREE.Vector3(  frustW,  frustH, -frustPlane ),
+              new THREE.Vector3( -frustW, -frustH, -frustPlane ),
+              new THREE.Vector3(  frustW, -frustH, -frustPlane )
+            ];
+            var frustGeom = new THREE.BufferGeometry().setFromPoints(frustPoints);
+            frustGeom.setIndex([0,1, 0, 2, 0, 3, 0, 4, 1, 2, 2, 4, 4, 3, 3, 1]);
+            var frustumHelper = new THREE.LineSegments(frustGeom, new THREE.LineBasicMaterial({color: 0xff0000}));
+            frustumHelper.position.set(10, 70, 140);
+            frustumHelper.rotation.x = Math.PI * 1.83 ; 
+            frustumHelper.updateMatrixWorld();
+            scene.add(frustumHelper);
+   
+           
+           
+
+
+           var meshh, faces, obscureBox;
+           var changingmaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, vertexColors: THREE.FaceColors } );
+         
+           var colors = [];
+           colors.push([0,180,200]);
+           colors.push([0,86,255]);
            
            new THREE.STLLoader().load( '../media/giraffe.stl', function ( geometry ) {
 
-				console.log(geometry);
-//               var cubeWireframe = new THREE.WireframeGeometry(geometry);
-//           var cubeMat = new THREE.LineBasicMaterial( { color: 0x22ffff, linewidth: 10 } );
-//                  
-//           var cubeLines = new THREE.LineSegments(cubeWireframe, cubeMat);
-//              cubeLines.scale.x = 0.5;
-//              cubeLines.scale.y = 0.5;
-//              cubeLines.scale.z = 0.5;
-//              cubeLines.rotation.x = - 3.14 / 2;
-//           scene.add(cubeLines);
-//              
-               
+                             var cubeWireframe = new THREE.WireframeGeometry(geometry);
+           var cubeMat = new THREE.LineBasicMaterial( { color: 0x00ffff, linewidth: 100 } );
+                  
+           cubeLines = new THREE.LineSegments(cubeWireframe, cubeMat);
+        
+              cubeLines.rotation.x = - 3.14 / 2;
+           wireframeScene.add(cubeLines);
+              
              geomFromBuffer = new THREE.Geometry().fromBufferGeometry( geometry );
+
+             giraffe = new THREE.Mesh(geomFromBuffer, changingmaterial);
+
+            faces = giraffe.geometry.faces;
+               for(var i = 0 ; i < faces.length; i++){
+                 var random = Math.random();
+                  
+                 if (random > 0.5) { 
+                   
+                    faces[i].color.setRGB(colors[0][0]/255, colors[0][1]/255, colors[0][2]/255);
+                 } else {
+                    faces[i].color.setRGB(colors[1][0]/255, colors[1][1]/255, colors[1][2]/255);
+                 }
+                  for (var j = 0; j < 3; j++) {
+//                     faces[i].vertexColors[j].setRGB(0.25, 0.25, randomB);
+                  }
               
-             
-             meshh = new THREE.Mesh(geomFromBuffer, changingmaterial);
-//              faces = geomFromBuffer.faces; 
-//
-//              meshh.scale.x = 0.5;
-//              meshh.scale.y = 0.5;
-//              meshh.scale.z = 0.5;
-//              
-              meshh.rotation.x = -3.14 / 2;
-               meshh.position.y -= 50;
-//              scene.add(meshh);
+            }
+               giraffe.geometry.elementsNeedUpdate = true;
+              giraffe.geometry.colorsNeedUpdate = true; 
+               giraffe.rotation.x = Math.PI /2 * -1;
+              scene.add(giraffe);
+              cubeLines.position.y -=50;
+              giraffe.position.y -=50;
               
-              screen = new THREE.Mesh(meshh.geometry, projectiveMaterial );
+              screen = new THREE.Mesh(giraffe.geometry, projectiveMaterial );
                screen.position.z = 0;
                //screen.scale.set(2,2,2); //double the size, for debugging purposes.
                screen.material = projectiveMaterial;
               screen.rotation.x = -3.14 / 2;
-              screen.scale.x = 0.5;
-              screen.scale.y = 0.5;
-              screen.scale.z = 0.5;
+//              screen.scale.x = 0.5;
+//              screen.scale.y = 0.5;
+//              screen.scale.z = 0.5;
+              screen.position.y -= 50;
                scene.add(screen);
 
                frustPoints.forEach( (p, idx) => {
@@ -246,19 +263,14 @@
 
                var rotation = THREE.Math.degToRad(15);
               
-              
               animate();
 
 			} );
-
-
-
-
-
-           
-           
-           
-           
+ 
+               var cube = new THREE.BoxGeometry(100,10,100);
+              var blackMaterial = new THREE.MeshBasicMaterial({color: '#000000'});
+              var cubeMesh = new THREE.Mesh(cube, blackMaterial);
+              scene.add(cubeMesh);
 
 			var gui = new dat.GUI();
 
@@ -286,17 +298,6 @@
 
 			} );
 
-			gui.add( params, 'rotationSpeed', 0.0, 1.0 ).step( 0.01 ).onChange( function ( value ) {
-
-				ROTATION_AMOUNT = Number( value );
-
-			} );
-
-			gui.add( params, 'rotationOffset', -180.0, +180.0 ).step( 1 ).onChange( function ( value ) {
-				screen.rotation.z = Number(value);
-				ROTATION_OFFSET = Number( value );
-			} );
-
 			window.onresize = function () {
 
 				var width = window.innerWidth;
@@ -310,23 +311,33 @@
 
 			};
 
+
 			function animate() {
-          
-              	screen.rotation.z += ROTATION_AMOUNT; 
+               
+               cubeMesh.position.y += 0.1;
+               if (cubeMesh.position.y >= 20) {
+                  cubeMesh.position.y = -50;
+               }
+
 				requestAnimationFrame( animate );
-                time += clock.getDelta();
+       
 				const delta = clock.getDelta();
 
 //				mixer.update( delta );
 
 				stats.update();
+               time += 1;
 
 				composer.render();
+                renderer.clear();                     // clear buffers
+                  renderer.render( scene, camera );     // render scene 1
+                  renderer.clearDepth();                // clear depth buffer
+                  renderer.render( wireframeScene, camera ); 
 
 			}
 
 		</script>
-
+       
 	</body>
 
 </html>
