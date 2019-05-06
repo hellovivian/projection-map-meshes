@@ -35,7 +35,7 @@
 	<body>
 
          <video id="videoTex" controls autoplay loop style="display:none">
-<source src="../media/bluefire.mp4" type='video/mp4; '>
+<source id="videoSource" src="../media/clouds2.mp4" type='video/mp4; '>
 </video>
 		<div id="container"></div>
 
@@ -55,6 +55,13 @@
 		<script src="../js/UnrealBloomPass.js"></script>
         <script src="../js/MeshLine.js"></script>
 		<script>
+           videoSources = [];
+           videoSources.push("../media/clouds.mp4");
+           videoSources.push("../media/particles.mp4");
+           videoSources.push("../media/petals.mp4");
+           videoSources.push("../media/bluefire.mp4");
+           videoSources.push("../media/clouds2.mp4");
+          
             videoTex.volume = 0;
 			var scene, camera, controls, pointLight, stats;
 			var composer, renderer, mixer;
@@ -63,7 +70,8 @@
 				exposure: 1,
 				bloomStrength: 1.5,
 				bloomThreshold: 0,
-				bloomRadius: 0
+				bloomRadius: 0,
+                videoTrack:0
 			};
             
            
@@ -295,6 +303,14 @@
 			gui.add( params, 'bloomRadius', 0.0, 1.0 ).step( 0.01 ).onChange( function ( value ) {
 
 				bloomPass.radius = Number( value );
+
+			} );
+           
+           gui.add( params, 'videoTrack', 0.0,6.0 ).step( 1.0 ).onChange( function ( value ) {
+
+				
+              videoSource.src = videoSources[Number(value)];
+              videoTex.load();
 
 			} );
 
