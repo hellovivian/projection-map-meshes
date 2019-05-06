@@ -73,10 +73,12 @@
 			renderer.setPixelRatio( window.devicePixelRatio );
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			renderer.toneMapping = THREE.ReinhardToneMapping;
+            renderer.autoClear = false;
 			container.appendChild( renderer.domElement );
 
 			scene = new THREE.Scene();
-            maskscene = new THREE.Scene();
+           
+            wireframeScene = new THREE.Scene();
 
 			camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 1000 );
 			camera.position.set( - 5, 2.5, - 3.5 );
@@ -84,6 +86,8 @@
 
 			controls = new THREE.OrbitControls( camera, renderer.domElement );
 			controls.maxPolarAngle = Math.PI * 0.5;
+           controls.minPolarAngle = Math.PI *0.5;
+//           controls.maxPolarAngle = Math.PI/2;
 			controls.minDistance = 1;
 		
 
@@ -107,35 +111,56 @@
 
            var meshh, faces, obscureBox;
            var changingmaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, vertexColors: THREE.FaceColors } );
-   
+         
+           var colors = [];
+           colors.push([237,200,144]);
+           colors.push([117,86,39]);
            
            new THREE.STLLoader().load( '../media/giraffe.stl', function ( geometry ) {
 
+                             var cubeWireframe = new THREE.WireframeGeometry(geometry);
+           var cubeMat = new THREE.LineBasicMaterial( { color: 0x22ffff, linewidth: 10 } );
+                  
+           cubeLines = new THREE.LineSegments(cubeWireframe, cubeMat);
+        
+              cubeLines.rotation.x = - 3.14 / 2;
+           wireframeScene.add(cubeLines);
+              
              geomFromBuffer = new THREE.Geometry().fromBufferGeometry( geometry );
 
-             meshh = new THREE.Mesh(geomFromBuffer, changingmaterial);
+             giraffe = new THREE.Mesh(geomFromBuffer, changingmaterial);
 
-            faces = meshh.geometry.faces;
+            faces = giraffe.geometry.faces;
                for(var i = 0 ; i < faces.length; i++){
-                 var randomR = Math.random();
-                  var randomG = Math.random();
-                  var randomB = Math.random();
-                 faces[i].color.setRGB(randomR, 0.25, randomB);
+                 var random = Math.random();
+                  
+                 if (random > 0.5) { 
+                   
+                    faces[i].color.setRGB(colors[0][0]/255, colors[0][1]/255, colors[0][2]/255);
+                 } else {
+                    faces[i].color.setRGB(colors[1][0]/255, colors[1][1]/255, colors[1][2]/255);
+                 }
                   for (var j = 0; j < 3; j++) {
 //                     faces[i].vertexColors[j].setRGB(0.25, 0.25, randomB);
                   }
               
             }
-               meshh.geometry.elementsNeedUpdate = true;
-              meshh.geometry.colorsNeedUpdate = true; 
-      
-              scene.add(meshh);
+               giraffe.geometry.elementsNeedUpdate = true;
+              giraffe.geometry.colorsNeedUpdate = true; 
+               giraffe.rotation.x = Math.PI /2 * -1;
+              scene.add(giraffe);
+              cubeLines.position.y -=50;
+              giraffe.position.y -=50;
+              
               
               animate();
 
 			} );
  
-
+               var cube = new THREE.BoxGeometry(100,10,100);
+              var blackMaterial = new THREE.MeshStandardMaterial({color: '#000000'});
+              var cubeMesh = new THREE.Mesh(cube, blackMaterial);
+              scene.add(cubeMesh);
 
 			var gui = new dat.GUI();
 
@@ -178,8 +203,11 @@
 
 
 			function animate() {
-          
                
+               cubeMesh.position.y += 0.1;
+               if (cubeMesh.position.y >= 20) {
+                  cubeMesh.position.y = -50;
+               }
 
 				requestAnimationFrame( animate );
        
@@ -190,6 +218,10 @@
 				stats.update();
 
 				composer.render();
+                renderer.clear();                     // clear buffers
+                  renderer.render( scene, camera );     // render scene 1
+                  renderer.clearDepth();                // clear depth buffer
+                  renderer.render( wireframeScene, camera ); 
 
 			}
 
