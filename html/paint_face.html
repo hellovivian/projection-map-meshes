@@ -33,6 +33,7 @@
 	</head>
 
 	<body>
+       <div id="button" style="height:50px; width: 200px; left: 300px; position: absolute;" ><a href="../html/paint_giraffevideo.html" style="background-color: blue; padding: 5px; ">Second set of effects</a></div>
 
 		<div id="container"></div>
 
@@ -42,6 +43,7 @@
 		<script src="../js/dat.gui.min.js"></script>
 		<script src="../js/OrbitControls.js"></script>
 		<script src="../js/GLTFLoader.js"></script>
+       <script src="../js/FlyControls.js"></script>
        <script src="../js/STLLoader.js"></script>
 		<script src="../js/EffectComposer.js"></script>
 		<script src="../js/RenderPass.js"></script>
@@ -49,21 +51,14 @@
 		<script src="../js/CopyShader.js"></script>
 		<script src="../js/LuminosityHighPassShader.js"></script>
 		<script src="../js/UnrealBloomPass.js"></script>
-
+ <script src="../js/createGUI.js"></script>
 		<script>
 
 			var scene, camera, controls, pointLight, stats;
 			var composer, renderer, mixer;
 			var cubeLines; 
 
-			var params = {
-				exposure: 1,
-				bloomStrength: 1.5,
-				bloomThreshold: 0,
-				bloomRadius: 0, 
-				rotationSpeed: 0, 
-				rotationOffset: 0
-			};
+		
 			var ROTATION_AMOUNT = 0;
 
 			var clock = new THREE.Clock();
@@ -160,43 +155,7 @@
  
 
 
-			var gui = new dat.GUI();
-
-			gui.add( params, 'exposure', 0.1, 2 ).onChange( function ( value ) {
-
-				renderer.toneMappingExposure = Math.pow( value, 4.0 );
-
-			} );
-
-//			gui.add( params, 'bloomThreshold', 0.0, 1.0 ).onChange( function ( value ) {
-//
-//				bloomPass.threshold = Number( value );
-//
-//			} );
-
-			gui.add( params, 'bloomStrength', 0.0, 3.0 ).onChange( function ( value ) {
-
-				bloomPass.strength = Number( value );
-
-			} );
-
-			gui.add( params, 'bloomRadius', 0.0, 1.0 ).step( 0.01 ).onChange( function ( value ) {
-
-				bloomPass.radius = Number( value );
-
-			} );
-
-			gui.add( params, 'rotationSpeed', 0.0, 1.0 ).step( 0.01 ).onChange( function ( value ) {
-
-				ROTATION_AMOUNT = Number( value );
-
-			} );
-
-			gui.add( params, 'rotationOffset', -180.0, +180.0 ).step( 1 ).onChange( function ( value ) {
-				meshh.rotation.z = Number(value);
-				cubeLines.rotation.z = Number(value);
-				ROTATION_OFFSET = Number(value);
-			} );
+		
 
 			window.onresize = function () {
 
@@ -233,7 +192,7 @@
 			}
 
 		</script>
-
+       <script src="../js/movementControls.js"></script>
 	</body>
 
 </html>

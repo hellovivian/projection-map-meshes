@@ -33,7 +33,8 @@
 	</head>
 
 	<body>
-
+       <div id="button" style="height:50px; width: 200px; left: 300px; position: absolute;" ><a href="../html/paint_face.html" style="background-color: blue; padding: 5px; ">First set of effects</a></div>
+       
          <video id="videoTex" controls autoplay loop style="display:none">
 <source id="videoSource" src="../media/clouds2.mp4" type='video/mp4; '>
 </video>
@@ -46,6 +47,7 @@
 		<script src="../js/dat.gui.min.js"></script>
 		<script src="../js/OrbitControls.js"></script>
     <script src="../js/FlyControls.js"></script>
+
 		<script src="../js/GLTFLoader.js"></script>
        <script src="../js/STLLoader.js"></script>
 		<script src="../js/EffectComposer.js"></script>
@@ -55,31 +57,14 @@
 		<script src="../js/LuminosityHighPassShader.js"></script>
 		<script src="../js/UnrealBloomPass.js"></script>
         <script src="../js/MeshLine.js"></script>
+       <script src="../js/createGUI.js"></script>
 		<script>
-           videoSources = [];
-           videoSources.push("../media/clouds.mp4");
-           videoSources.push("../media/particles.mp4");
-           videoSources.push("../media/petals.mp4");
-           videoSources.push("../media/bluefire.mp4");
-           videoSources.push("../media/clouds2.mp4");
-           
-           backgrounds = [];
-           backgrounds.push("");
+
           
             videoTex.volume = 0;
 			var scene, camera, controls, pointLight, stats;
 			var composer, renderer, mixer;
-
-			var params = {
-				exposure: 1,
-				bloomStrength: 1.5,
-				bloomThreshold: 0,
-				bloomRadius: 0,
-                videoTrack:0,
-               backgroundChoice:0
-			};
-            
-           
+     
 			var clock = new THREE.Clock();
 			var container = document.getElementById( 'container' );
 
@@ -126,98 +111,19 @@
 			composer.addPass( bloomPass );
            
            
-                        var projectiveMaterial = new THREE.ShaderMaterial({
-             uniforms: {
-                 baseColor: {value: new THREE.Color(0xcccccc)},
-                 frustum: { value: [
-                 new THREE.Vector3(),
-                 new THREE.Vector3(),
-                 new THREE.Vector3(),
-                 new THREE.Vector3(),
-                 new THREE.Vector3(),
-                 ]},
-               texture: {value: new THREE.VideoTexture( videoTex )}
-             },
-             vertexShader: `
-
-               varying vec4 vWorldPos;
-
-               void main() {
-                 vWorldPos = modelMatrix * vec4(position, 1.0);
-                 gl_Position = projectionMatrix * viewMatrix * vWorldPos;
-               }
-             `,
-             fragmentShader: `
-                 uniform vec3 baseColor;
-               uniform vec3 frustum[5];
-               uniform sampler2D texture;
-
-               varying vec4 vWorldPos;
-
-               // port from https://github.com/mrdoob/three.js/blob/35ae830a7c4544582ed2759e5b18c5d6ef37c6d9/src/math/Vector3.js#L559
-               vec3 projectOnVector(vec3 a, vec3 b){
-                 float dist = length(b);
-                 return b * ( dot(a, b) / (dist * dist) );
-               }
-
-                 void main() {
-
-                 vec3 dir = vWorldPos.xyz - frustum[0];
-                 vec3 center = (frustum[1] + frustum[2] + frustum[3] + frustum[4]) * 0.25;
-                 vec3 frustumAxis = center - frustum[0];
-
-                 vec3 projected = projectOnVector(dir, frustumAxis);
-                 float scalar = length(frustumAxis) / length(projected);
-                 vec3 planeProj = ( dir * scalar ) + frustum[0];
-
-                 // UVs
-                 vec3 uvBase = planeProj - frustum[1]; // from top-left corner
-
-                 vec3 sub12 = frustum[2] - frustum[1];
-                 vec3 sub12uv = projectOnVector(uvBase, sub12);
-                 float u = length(sub12uv) * sign(dot(sub12, sub12uv)) / length(sub12);
-                 vec3 sub13 = frustum[3] - frustum[1];
-                 vec3 sub13uv = projectOnVector(uvBase, sub13);
-                 float v = length(sub13uv) * sign(dot(sub13, sub13uv)) / length(sub13);
-                 v = 1. - v;
-
-                 vec3 color = ( max( u,v ) <= 1. && min( u, v ) >= 0. ) ? texture2D(texture, vec2(u, v)).rgb : vec3(1);
-
-                 gl_FragColor = vec4(baseColor * color, 1.0);
-               }
-             `,
-             side: THREE.DoubleSide
-           }); 
-          
-           var time = 0;
-           
-           //projector frustrum   
-            var frustFOV = 30;
-            var frustRatio = 16 / 9;
-            var frustPlane = 40;
-            var frustH = frustPlane * Math.sin(THREE.Math.degToRad(frustFOV * 0.5));
-            var frustW = frustH * frustRatio;
-            var frustPoints = [
-                new THREE.Vector3(),
-                new THREE.Vector3( -frustW,  frustH, -frustPlane ),
-              new THREE.Vector3(  frustW,  frustH, -frustPlane ),
-              new THREE.Vector3( -frustW, -frustH, -frustPlane ),
-              new THREE.Vector3(  frustW, -frustH, -frustPlane )
-            ];
-            var frustGeom = new THREE.BufferGeometry().setFromPoints(frustPoints);
-            frustGeom.setIndex([0,1, 0, 2, 0, 3, 0, 4, 1, 2, 2, 4, 4, 3, 3, 1]);
-            var frustumHelper = new THREE.LineSegments(frustGeom, new THREE.LineBasicMaterial({color: 0xff0000}));
-            frustumHelper.position.set(10, 70, 140);
-            frustumHelper.rotation.x = Math.PI * 1.83 ; 
-            frustumHelper.updateMatrixWorld();
-            scene.add(frustumHelper);
+       </script>
+       <script src="../js/projectorDependency.js"></script>
+       <script>
    
-           var meshh, faces, obscureBox;
+           var meshh, faces, obscureBox, cubeLines, giraffe;
            var changingmaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, vertexColors: THREE.FaceColors } );
          
            var colors = [];
            colors.push([0,180,200]);
            colors.push([0,86,255]);
+           
+           cubeLines = new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.BoxBufferGeometry(1,1,1), changingmaterial));
+           
            
            new THREE.STLLoader().load( '../media/giraffe.stl', function ( geometry ) {
 
@@ -226,7 +132,7 @@
                   
            cubeLines = new THREE.LineSegments(cubeWireframe, cubeMat);
         
-              cubeLines.rotation.x = - 3.14 / 2;
+            cubeLines.rotation.x = - 3.14 / 2;
            wireframeScene.add(cubeLines);
               
              geomFromBuffer = new THREE.Geometry().fromBufferGeometry( geometry );
@@ -281,69 +187,8 @@
               var cubeMesh = new THREE.Mesh(cube, blackMaterial);
               scene.add(cubeMesh);
            
-           
-            var bgTexture0 = new THREE.TextureLoader().load( "../media/blackbg.jpg" );
-bgTexture0.wrapS = THREE.RepeatWrapping;
-bgTexture0.wrapT = THREE.RepeatWrapping;
-bgTexture0.repeat.set( 1, 1 );
-     
-           
-           var bgTexture1 = new THREE.TextureLoader().load( "../media/blackbg1.jpg" );
-bgTexture1.wrapS = THREE.RepeatWrapping;
-bgTexture1.wrapT = THREE.RepeatWrapping;
-bgTexture1.repeat.set( 1, 1 );
-           
-           var bgTexture2 = new THREE.TextureLoader().load( "../media/blackbg2.jpg" );
-bgTexture2.wrapS = THREE.RepeatWrapping;
-bgTexture2.wrapT = THREE.RepeatWrapping;
-bgTexture2.repeat.set( 1, 1 );
-           
-       
-           backgrounds = [bgTexture0,bgTexture1,bgTexture2];
-           
       scene.background = bgTexture0;
-
-			var gui = new dat.GUI();
-
-			gui.add( params, 'exposure', 0.1, 2 ).onChange( function ( value ) {
-
-				renderer.toneMappingExposure = Math.pow( value, 4.0 );
-
-			} );
-
-			gui.add( params, 'bloomThreshold', 0.0, 1.0 ).onChange( function ( value ) {
-
-				bloomPass.threshold = Number( value );
-
-			} );
-
-			gui.add( params, 'bloomStrength', 0.0, 3.0 ).onChange( function ( value ) {
-
-				bloomPass.strength = Number( value );
-
-			} );
-
-			gui.add( params, 'bloomRadius', 0.0, 1.0 ).step( 0.01 ).onChange( function ( value ) {
-
-				bloomPass.radius = Number( value );
-
-			} );
            
-           gui.add( params, 'videoTrack', 0.0,6.0 ).step( 1.0 ).onChange( function ( value ) {
-
-				
-              videoSource.src = videoSources[Number(value)];
-              videoTex.load();
-
-			} );
-           
-           gui.add( params, 'backgroundChoice', 0.0,2.0 ).step( 1.0 ).onChange( function ( value ) {
-
-				
-              scene.background = backgrounds[Number(value)];
-            
-
-			} );
 
 			window.onresize = function () {
 
@@ -366,7 +211,7 @@ bgTexture2.repeat.set( 1, 1 );
                   cubeMesh.position.y = -50;
                }
 				requestAnimationFrame( animate );
-        rotateObjs();
+               rotateObjs();
        
 				const delta = clock.getDelta();
 
