@@ -169,11 +169,11 @@
 
 			} );
 
-			gui.add( params, 'bloomThreshold', 0.0, 1.0 ).onChange( function ( value ) {
-
-				bloomPass.threshold = Number( value );
-
-			} );
+//			gui.add( params, 'bloomThreshold', 0.0, 1.0 ).onChange( function ( value ) {
+//
+//				bloomPass.threshold = Number( value );
+//
+//			} );
 
 			gui.add( params, 'bloomStrength', 0.0, 3.0 ).onChange( function ( value ) {
 
@@ -212,9 +212,12 @@
 
 			};
 
+            var index = 0;
 
 			function animate() {
           
+               bloomPass.threshold = Math.abs( Math.sin(index)/2);
+               index += 0.01;
                
 				meshh.rotation.z += ROTATION_AMOUNT; 
 				cubeLines.rotation.z += ROTATION_AMOUNT;

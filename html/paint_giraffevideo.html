@@ -61,6 +61,9 @@
            videoSources.push("../media/petals.mp4");
            videoSources.push("../media/bluefire.mp4");
            videoSources.push("../media/clouds2.mp4");
+           
+           backgrounds = [];
+           backgrounds.push("");
           
             videoTex.volume = 0;
 			var scene, camera, controls, pointLight, stats;
@@ -71,7 +74,8 @@
 				bloomStrength: 1.5,
 				bloomThreshold: 0,
 				bloomRadius: 0,
-                videoTrack:0
+                videoTrack:0,
+               backgroundChoice:0
 			};
             
            
@@ -207,10 +211,6 @@
             frustumHelper.updateMatrixWorld();
             scene.add(frustumHelper);
    
-           
-           
-
-
            var meshh, faces, obscureBox;
            var changingmaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, vertexColors: THREE.FaceColors } );
          
@@ -279,6 +279,28 @@
               var blackMaterial = new THREE.MeshBasicMaterial({color: '#000000'});
               var cubeMesh = new THREE.Mesh(cube, blackMaterial);
               scene.add(cubeMesh);
+           
+           
+            var bgTexture0 = new THREE.TextureLoader().load( "../media/blackbg.jpg" );
+bgTexture0.wrapS = THREE.RepeatWrapping;
+bgTexture0.wrapT = THREE.RepeatWrapping;
+bgTexture0.repeat.set( 1, 1 );
+     
+           
+           var bgTexture1 = new THREE.TextureLoader().load( "../media/blackbg1.jpg" );
+bgTexture1.wrapS = THREE.RepeatWrapping;
+bgTexture1.wrapT = THREE.RepeatWrapping;
+bgTexture1.repeat.set( 1, 1 );
+           
+           var bgTexture2 = new THREE.TextureLoader().load( "../media/blackbg2.jpg" );
+bgTexture2.wrapS = THREE.RepeatWrapping;
+bgTexture2.wrapT = THREE.RepeatWrapping;
+bgTexture2.repeat.set( 1, 1 );
+           
+       
+           backgrounds = [bgTexture0,bgTexture1,bgTexture2];
+           
+      scene.background = bgTexture0;
 
 			var gui = new dat.GUI();
 
@@ -311,6 +333,14 @@
 				
               videoSource.src = videoSources[Number(value)];
               videoTex.load();
+
+			} );
+           
+           gui.add( params, 'backgroundChoice', 0.0,2.0 ).step( 1.0 ).onChange( function ( value ) {
+
+				
+              scene.background = backgrounds[Number(value)];
+            
 
 			} );
 
