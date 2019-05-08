@@ -217,12 +217,13 @@
 
 				stats.update();
 
-				composer.render();
-                renderer.clear();                     // clear buffers
-                  renderer.render( scene, camera );     // render scene 1
-                  renderer.clearDepth();                // clear depth buffer
-                  renderer.render( wireframeScene, camera ); 
-
+			
+//                renderer.clear();               
+//                renderer.render( wireframeScene, camera ); // clear buffers
+                  // render scene 1
+//                  renderer.clearDepth();                // clear depth buffer
+//                  renderer.render( scene, camera );    
+               composer.render();
 			}
 
 		</script>
