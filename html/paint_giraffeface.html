@@ -85,18 +85,13 @@
 			camera.position.set( - 5, 2.5, - 3.5 );
 			scene.add( camera );
 
-// 			controls = new THREE.OrbitControls( camera, renderer.domElement );
-// 			controls.maxPolarAngle = Math.PI * 0.5;
-//            controls.minPolarAngle = Math.PI *0.5;
-// //           controls.maxPolarAngle = Math.PI/2;
-// 			controls.minDistance = 1;
+			controls = new THREE.OrbitControls( camera, renderer.domElement );
+			controls.maxPolarAngle = Math.PI * 0.5;
+           controls.minPolarAngle = Math.PI *0.5;
+//           controls.maxPolarAngle = Math.PI/2;
+			controls.minDistance = 1;
 
-controls = new THREE.FlyControls( camera );
-controls.movementSpeed = 10;
-controls.domElement = renderer.domElement;
-controls.rollSpeed = Math.PI / 24;
-controls.autoForward = false;
-controls.dragToLook = true;
+
 		
 
 			scene.add( new THREE.AmbientLight( 0x404040 ) );
