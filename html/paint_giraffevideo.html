@@ -45,6 +45,7 @@
 		<script src="../js/stats.min.js"></script>
 		<script src="../js/dat.gui.min.js"></script>
 		<script src="../js/OrbitControls.js"></script>
+    <script src="../js/FlyControls.js"></script>
 		<script src="../js/GLTFLoader.js"></script>
        <script src="../js/STLLoader.js"></script>
 		<script src="../js/EffectComposer.js"></script>
@@ -364,8 +365,8 @@ bgTexture2.repeat.set( 1, 1 );
                if (cubeMesh.position.y >= 20) {
                   cubeMesh.position.y = -50;
                }
-
 				requestAnimationFrame( animate );
+        rotateObjs();
        
 				const delta = clock.getDelta();
 
@@ -383,6 +384,8 @@ bgTexture2.repeat.set( 1, 1 );
 			}
 
 		</script>
+    <script src="../js/movementControls.js"></script>
+
        
 	</body>
 
