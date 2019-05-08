@@ -140,11 +140,11 @@
              giraffe = new THREE.Mesh(geomFromBuffer, changingmaterial);
 
             faces = giraffe.geometry.faces;
-               for(var i = 0 ; i < faces.length; i++){
+               for(var i = 0 ; i < faces.length; i++) {
                  var random = Math.random();
                   
                  if (random > 0.5) { 
-                   
+
                     faces[i].color.setRGB(colors[0][0]/255, colors[0][1]/255, colors[0][2]/255);
                  } else {
                     faces[i].color.setRGB(colors[1][0]/255, colors[1][1]/255, colors[1][2]/255);
@@ -170,6 +170,7 @@
 //              screen.scale.y = 0.5;
 //              screen.scale.z = 0.5;
               screen.position.y -= 50;
+              screen.name = 'screen';
                scene.add(screen);
 
                frustPoints.forEach( (p, idx) => {
@@ -185,6 +186,7 @@
                var cube = new THREE.BoxGeometry(100,10,100);
               var blackMaterial = new THREE.MeshBasicMaterial({color: '#000000'});
               var cubeMesh = new THREE.Mesh(cube, blackMaterial);
+          cubeMesh.name = 'cubeMesh';
               scene.add(cubeMesh);
            
       scene.background = bgTexture0;
