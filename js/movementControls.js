@@ -22,10 +22,10 @@ gui.add( params, 'rotationOffset', -180.0, +180.0 ).step( 1 ).onChange( function
 });
 
 
-controls = new THREE.FlyControls( camera );
-controls.movementSpeed = 10;
+controls = new THREE.FlyControls( camera, renderer.domElement );
+controls.movementSpeed = 2;
 controls.domElement = renderer.domElement;
-controls.rollSpeed = Math.PI / 24;
+controls.rollSpeed = Math.PI / 48;
 controls.autoForward = false;
 controls.dragToLook = true;
 
