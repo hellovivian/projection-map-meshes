@@ -15,11 +15,11 @@ params.rotationSpeed = 0;
 params.rotationOffset =0; 
 
 var possibleObjs = [];
-gui.add( params, 'rotationSpeed', 0.0, 0.2 ).step( 0.01 ).onChange( function ( value ) {
+gui.add( params, 'rotationSpeed', 0.0, 0.1 ).step( 0.0000001 ).onChange( function ( value ) {
 	ROTATION_AMOUNT = Number( value );
 } );
 
-gui.add( params, 'rotationOffset', -180.0, +180.0 ).step( 1 ).onChange( function ( value ) {
+gui.add( params, 'rotationOffset', -3, +3 ).step( 0.0000001 ).onChange( function ( value ) {
 	cubeLines.rotation.z = Number(value);
 	
 	for (var i = 0; i < possibleObjs.length; i++) {
