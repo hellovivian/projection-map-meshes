@@ -187,6 +187,16 @@
               var blackMaterial = new THREE.MeshBasicMaterial({color: '#000000'});
               var cubeMesh = new THREE.Mesh(cube, blackMaterial);
           cubeMesh.name = 'cubeMesh';
+          
+          var toggleCube = new THREE.BoxGeometry(10,10,10);
+              var redMaterial = new THREE.MeshBasicMaterial({color: '#ff0000'});
+              var cubeMesh2 = new THREE.Mesh(toggleCube, redMaterial);
+          cubeMesh2.position.y -= 40;
+          cubeMesh2.position.z += 40;
+          cubeMesh2.position.x -= 20;
+          scene.add(cubeMesh2);
+          
+          
               scene.add(cubeMesh);
            
       scene.background = bgTexture0;
