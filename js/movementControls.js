@@ -41,18 +41,17 @@ controls.dragToLook = true;
 var delta = 0.5;
 
 var interval = setInterval(function() {
-    // get elem
+    //possibleObjs.push(theMesh);
+   	possibleObjs.push(cubeLines);
+   	possibleObjs.push(meshh);
+   	possibleObjs.push(screen);
     if (typeof giraffe == 'undefined') return;
+    possibleObjs.push(giraffe);
     clearInterval(interval);
-//    possibleObjs.push(theMesh);
-   possibleObjs.push(cubeLines);
-   possibleObjs.push(giraffe);
-   possibleObjs.push(screen);
-
-   console.log("hi"); 
-
     
-}, 10);
+   
+   
+}, 100);
 
 
    

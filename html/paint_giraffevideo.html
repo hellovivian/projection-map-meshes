@@ -64,6 +64,7 @@
             videoTex.volume = 0;
 			var scene, camera, controls, pointLight, stats;
 			var composer, renderer, mixer;
+			var cubeMesh2;
      
 			var clock = new THREE.Clock();
 			var container = document.getElementById( 'container' );
@@ -154,7 +155,7 @@
                   }
               
             }
-               giraffe.geometry.elementsNeedUpdate = true;
+              giraffe.geometry.elementsNeedUpdate = true;
               giraffe.geometry.colorsNeedUpdate = true; 
               giraffe.rotation.x = Math.PI /2 * -1;
               scene.add(giraffe);
@@ -178,26 +179,31 @@
                });
 
                var rotation = THREE.Math.degToRad(15);
+
+               
+          
+	          var toggleCube = new THREE.BoxGeometry(10,10,10);
+	          var redMaterial = new THREE.MeshBasicMaterial({color: '#ff0000'});
+	          cubeMesh2 = new THREE.Mesh(toggleCube, redMaterial);
+	          cubeMesh2.position.y -= 40;
+	          cubeMesh2.position.z += 40;
+	          cubeMesh2.position.x -= 20;
+	          scene.add(cubeMesh2);
+	          //scene.add(cubeMesh);
+
+	          attach(cubeMesh2, giraffe);
               
               animate();
 
 			} );
  
-               var cube = new THREE.BoxGeometry(100,10,100);
+               
+          var cube = new THREE.BoxGeometry(100,10,100);
               var blackMaterial = new THREE.MeshBasicMaterial({color: '#000000'});
               var cubeMesh = new THREE.Mesh(cube, blackMaterial);
-          cubeMesh.name = 'cubeMesh';
+          	  cubeMesh.name = 'cubeMesh';
           
-          var toggleCube = new THREE.BoxGeometry(10,10,10);
-              var redMaterial = new THREE.MeshBasicMaterial({color: '#ff0000'});
-              var cubeMesh2 = new THREE.Mesh(toggleCube, redMaterial);
-          cubeMesh2.position.y -= 40;
-          cubeMesh2.position.z += 40;
-          cubeMesh2.position.x -= 20;
-          scene.add(cubeMesh2);
-          
-          
-              scene.add(cubeMesh);
+              
            
       scene.background = bgTexture0;
            
@@ -214,6 +220,15 @@
 				composer.setSize( width, height );
 
 			};
+
+			function attach(cubeMesh2, giraffe) {
+          		var interval = setInterval(function() {
+          			cubeMesh2.applyMatrix( new THREE.Matrix4().getInverse( giraffe.matrixWorld ) );
+		  			scene.remove( cubeMesh2 );
+		  			cubeMesh2.parent = giraffe;
+          			giraffe.add(cubeMesh2);
+				}, 1000);
+			}
 
 
 			function animate() {
